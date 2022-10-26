@@ -4,4 +4,4 @@ DES File :
 + con bug chua chay dc
 #
 AES File :
-+ Dang pha tien thuat toan cho cac ham
++ Dang phat tien thuat toan cho cac ham
