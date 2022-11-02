@@ -1,7 +1,7 @@
 # DES-AES
 DES File : 
-+ code cac ham dung de encrypt
-+ con bug chua chay dc
++ DES_python_code
++ Result
 #
 AES File :
-+ Dang phat tien thuat toan cho cac ham
++ just AES function
