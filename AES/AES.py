@@ -1,3 +1,6 @@
+# Function Use for all
+#hextbin function
+
 def hextobin(s):
     changehex = { '0' : '0000',
                '1' : '0001',
@@ -19,7 +22,7 @@ def hextobin(s):
     for i in range(len(s)):
         binary = binary + changehex[s[i]]
     return binary
-
+#bintohex function
 def bintohex(s) :
     changebin = { '0000' : '0',
                   '0001' : '1',
@@ -46,7 +49,7 @@ def bintohex(s) :
         ch += s[i+3]
         heximal = heximal + changebin[ch]
     return heximal
-
+#bin to dec function
 def bintodec(binary): #ham chuyen bin ve dec
     decimal = 0
     i = 0
@@ -56,13 +59,13 @@ def bintodec(binary): #ham chuyen bin ve dec
         binary = binary // 10
         i += 1
     return decimal
-
+#permute function
 def permute(k,arr,n):
     permutation =''
     for i in range(0,n):
         permutation += k[arr[i]- 1]
     return permutation
-
+#xor two string function
 def xor(a,b):
     cal = ''
     for i in range(len(a)):
@@ -71,7 +74,7 @@ def xor(a,b):
         else:
             cal += '1'
     return cal
-
+#function change input to 16 byte matrix with type bin
 def ge_matrix(pt):
     c_matrix =[]
     for i in range(0,len(pt),2):
@@ -82,72 +85,190 @@ def ge_matrix(pt):
     for i in range(len(c_matrix)):
         c_matrix[i]=hextobin(c_matrix[i])
     return c_matrix
-re_mixed_tabel = [1,5,9,13,
+#Function use for one:
+pt = '0123456789abcdeffedcba9876543210'
+key = '0f1571c947d9e8590cb7add6af7f6798'
+pt = pt.upper()
+key = key.upper()
+#use for shiftrow:    
+shiftrow_table = [1,5,9,13,
+                  6,10,14,2,
+                  11,15,3,7,
+                  16,4,8,12]
+#use for mixcolumn:
+re_table = [1,5,9,13,
                   2,6,10,14,
                   3,7,11,15,
                   4,8,12,16]
-    
-shiftrow_table = [1,2,3,4,
-                  6,7,8,5,
-                  11,12,9,10,
-                  16,13,14,15]
-def gmul(a,b):
-    if b == 1:
-        return a
-    tmp = (a << 1) & 0xFF
-    if b == 2:
-        if  a < 128 :
-            return tmp
-        else :
-            return tmp ^ 0x1b
-    if b == 3:
-        return gmul(a,2) ^ a
-    
-def transform_to_hex(val):
-    newval = '{:02x}'.format(val)
-    return newval.upper()
-    
-def mix_columns(a,b,c,d,mixed_matrix):
-    mixed_matrix.append(gmul(a, 2) ^ gmul(b, 3) ^ gmul(c, 1) ^ gmul(d, 1))
-    mixed_matrix.append(gmul(a, 1) ^ gmul(b, 2) ^ gmul(c, 3) ^ gmul(d, 1))
-    mixed_matrix.append(gmul(a, 1) ^ gmul(b, 1) ^ gmul(c, 2) ^ gmul(d, 3))
-    mixed_matrix.append(gmul(a, 3) ^ gmul(b, 1) ^ gmul(c, 1) ^ gmul(d, 2))
-    return mixed_matrix
 
-#test
 
+def gmul(x, a):                   #phep nhan trong GF(2^8)
+    x = hextobin(x)
+    value = ''
+    if int(a) == 1:                         #nhan x voi '01'
+        return x#bintohex(x)                
+    elif int(a) == 2:                       #nhan x voi '02'
+        if int(x[0]) == 0:
+            for i in range(1, len(x)):
+                value += x[i]
+            value += '0'
+        else:
+            value = xor(x[1:] + '0', '00011011')
+        return value#bintohex(value)
+def mixColumns(a, b, c, d):
+    val = []
+    val.append(xor(xor(xor(gmul(a, 2),xor(gmul(b,1),gmul(b,2))) , gmul(c, 1)) , gmul(d, 1)))
+    val.append(xor(xor(xor(gmul(a, 1),gmul(b, 2)) ,xor(gmul(c, 1),gmul(c,2))) ,gmul(d, 1)))
+    val.append(xor(xor(xor(gmul(a, 1),gmul(b, 1)) , gmul(c, 2)) , xor(gmul(d, 1),gmul(d,2))))
+    val.append(xor(xor(xor(xor(gmul(a, 1),gmul(a,2)),gmul(b, 1)), gmul(c, 1)) , gmul(d, 2)))
+    return val
+    
+def change_to_dictionary(pt):
+    for i in range(len(pt)):
+        for j in range(len(pt[i])):
+            pt[i][j] = bintohex(pt[i][j])
+def permute_dictionary(k,arr,n):
+    permutation =[]
+    for i in range(0,n):
+        permutation.append(k[arr[i]- 1])
+    return permutation    
+# Sbox
+sbox = [['63', '7C', '77', '7B', 'F2', '6B', '6F', 'C5', '30', '01', '67', '2B', 'FE', 'D7', 'AB', '76'],
+        ['CA', '82', 'C9', '7D', 'FA', '59', '47', 'F0', 'AD', 'D4', 'A2', 'AF', '9C', 'A4', '72', 'C0'],
+        ['B7', 'FD', '93', '26', '36', '3F', 'F7', 'CC', '34', 'A5', 'E5', 'F1', '71', 'D8', '31', '15'],
+        ['04', 'C7', '23', 'C3', '18', '96', '05', '9A', '07', '12', '80', 'E2', 'EB', '27', 'B2', '75'],
+        ['09', '83', '2C', '1A', '1B', '6E', '5A', 'A0', '52', '3B', 'D6', 'B3', '29', 'E3', '2F', '84'],
+        ['53', 'D1', '00', 'ED', '20', 'FC', 'B1', '5B', '6A', 'CB', 'BE', '39', '4A', '4C', '58', 'CF'],
+        ['D0', 'EF', 'AA', 'FB', '43', '4D', '33', '85', '45', 'F9', '02', '7F', '50', '3C', '9F', 'A8'],
+        ['51', 'A3', '40', '8F', '92', '9D', '38', 'F5', 'BC', 'B6', 'DA', '21', '10', 'FF', 'F3', 'D2'],
+        ['CD', '0C', '13', 'EC', '5F', '97', '44', '17', 'C4', 'A7', '7E', '3D', '64', '5D', '19', '73'],
+        ['60', '81', '4F', 'DC', '22', '2A', '90', '88', '46', 'EE', 'B8', '14', 'DE', '5E', '0B', 'DB'],
+        ['E0', '32', '3A', '0A', '49', '06', '24', '5C', 'C2', 'D3', 'AC', '62', '91', '95', 'E4', '79'],
+        ['E7', 'C8', '37', '6D', '8D', 'D5', '4E', 'A9', '6C', '56', 'F4', 'EA', '65', '7A', 'AE', '08'],
+        ['BA', '78', '25', '2E', '1C', 'A6', 'B4', 'C6', 'E8', 'DD', '74', '1F', '4B', 'BD', '8B', '8A'],
+        ['70', '3E', 'B5', '66', '48', '03', 'F6', '0E', '61', '35', '57', 'B9', '86', 'C1', '1D', '9E'],
+        ['E1', 'F8', '98', '11', '69', 'D9', '8E', '94', '9B', '1E', '87', 'E9', 'CE', '55', '28', 'DF'],
+        ['8C', 'A1', '89', '0D', 'BF', 'E6', '42', '68', '41', '99', '2D', '0F', 'B0', '54', 'BB', '16']]
+
+#use for key expansion:
+
+#Rcon
+Rcon = ['01', '02', '04', '08', '10', '20', '40', '80', '1B', '36']
+#ge_matrix_hex function:
+def ge_matrixhex(pt):
+    c_matrix =[]
+    for i in range(0,len(pt),2):
+        ch =''
+        ch += pt[i]
+        ch += pt[i+1]
+        c_matrix.append(ch)
+    #for i in range(len(c_matrix)):
+        #c_matrix[i]=hextobin(c_matrix[i])
+    return c_matrix
+#left shift function
+def rotword(word):
+    return word[1:] + word[:1]
+#subtitute function
+def subword(word):
+    b_word = []
+    s_word =[]
+    
+    for i in range(len(word)):
+        b_word.append(hextobin(word[i]))
+    for i in range(len(b_word)):
+        
+        row = bintodec(int(b_word[i][0] + b_word[i][1] + b_word[i][2] + b_word[i][3]))
+        column = bintodec(int(b_word[i][4] + b_word[i][5] + b_word[i][6] + b_word[i][7]))
+        val = sbox[row][column]
+        s_word.append(val)
+      
+    return s_word
+# xor with rcon function 
+def r_xor(rcon,y):
+    val = []
+    val.append(bintohex(xor(hextobin(rcon),hextobin(y[0]))))
+    val = val + y[1:]
+    return val
+# xor two list function
+def wt_xor(word,temp):
+    value = []
+    for i in range(len(word)):
+        value.append(bintohex(xor(hextobin(word[i]),hextobin(temp[i]))))
+    return value
+#Use for add round key
+def tuptolist(pt):
+    back =[]
+    for i in range(len(pt)) :
+        for j in range (len(pt[i])):
+            back.append(hextobin(pt[i][j]))
+    return back
+def list_bin(pt):
+    val = []
+    for i in range(len(pt)):
+        val.append(hextobin(pt[i]))
+    return val
+
+#KEY EXPANSION ALGORITHM
+def key_expansion(key):
+    key = key.upper()
+    key = ge_matrixhex(key)
+    w = [()]*44
+    #tao ra 4 word ban dau
+    for i in range(4):
+        w[i] = (key[4*i],key[4*i+1],key[4*i+2],key[4*i+3])
+
+    for i in range(4,44):
+    #get required previous keywords
+        temp = w[i-1]
+        word = w[i-4]
+
+    #if multiple of 4 use rot, sub, rcon et
+        if i % 4 == 0:
+            x = rotword(temp)
+            y = subword(x)
+            rcon = Rcon[int(i/4)-1]        
+            temp =tuple(r_xor(rcon,y))
+        
+        xord = ''.join(wt_xor(word,temp))
+        w[i] = (xord[:2],xord[2:4],xord[4:6],xord[6:8])
+    return w
+
+w = key_expansion(key)
+def encrypt(w,pt_u):
+    w_bin = tuptolist(w)
+    pre_pt = ge_matrix(pt_u)
+    #pre_pt = permute(pre_pt,re_table,16)
+    for i in range(len(pre_pt)):
+        pre_pt[i] = bintohex(xor(pre_pt[i],w_bin[i]))
             
-#pre tranform -> input
-# pretranform = xor(c_matrix(pt),key[0]) = in_input
-def encrypt():
-    if len(key) == 128 :
-        n = 10
-    else if len(key) == 192 :
-        n = 12
-    else :
-        n = 14
-    for i in range(n):
+    #10 round
+    j = 4
+    
+    for i in range(10):
         #s box algorithm
-        sbox_str = ''
-        for j in range (0,16):
-            row = bintodec(int(in_input[j*8] + in_input[j*8+1] + in_input[j*8+2] + in_input[j*8+3]))
-            column = bintodec(int(in_input[j*8+4] + in_input[j*8+5] + in_input[j*8+6] + in_input[j*8+7]))
-            value = sbox[row][column]
-            sbox_str += hextobin(value)
+        sub_pt = subword(pre_pt)
+        
         #shiftrow algorithm
-        shifted_matrix = permute(sbox_str,shiftrow_table,16)
+        s_pt = ge_matrix(permute(sub_pt,shiftrow_table,16))
+        for i in range(len(s_pt)):
+            s_pt[i] = bintohex(s_pt[i])
         #Mix column algorithm
-        if i == ( n - 1) :
+        if i == ( 8) :
             continue
         else :
-            for i in range(len(shifted_matrix)):
-                cal_matrix.append(hex(int(bintodec(shifted_matrix[i])))) # chuyen phan tu cua ma trix ve dang hexa 0x
-                mixed_matrix = []
+            sm_pt = []
             for i in range(0,4):
-                mix_columns(cal_matrix[i],cal_matrix[i+4],cal_matrix[i+8],cal_matrix[i+12],mixed_matrix)
-                re_mixed_matrix = permute(mixed_matrix,re_mixed_table,16)
-            for i in range(len(re_mixed_matrix)):
-                m_matrix.append(transform_to_hex(re_mixed_matrix[i]))
+                sm_pt.append(mixColumns(s_pt[i],s_pt[i+4],s_pt[i+8],s_pt[i+12]))
+            for i in range(len(sm_pt)):
+                for j in range(len(sm_pt[i])):
+                    sm_pt[i][j] = bintohex(sm_pt[i][j])
+            change_to_dictionary(sm_pt)
+            m_pt = []
+            m_pt = permute_dictionary(sm_pt,re_table,16)
         #Addroundkey algorithm
-                cipher_text = xor(m_matrix,key)
-        
+        for i in range(len(m_pt)):
+            pt[i] = xor(hextobin(fmpt[i]),w_bin[j+i])
+        j = j + 4
+    return pt
+
+      
