@@ -124,9 +124,11 @@ def mixColumns(a, b, c, d):
     return val
     
 def change_to_dictionary(pt):
+    new_pt = []
     for i in range(len(pt)):
         for j in range(len(pt[i])):
-            pt[i][j] = bintohex(pt[i][j])
+            new_pt.append(pt[i][j])
+    return new_pt
 def permute_dictionary(k,arr,n):
     permutation =[]
     for i in range(0,n):
@@ -236,39 +238,48 @@ def key_expansion(key):
 w = key_expansion(key)
 def encrypt(w,pt_u):
     w_bin = tuptolist(w)
+    print('w_bin : ' , w_bin)
     pre_pt = ge_matrix(pt_u)
     #pre_pt = permute(pre_pt,re_table,16)
     for i in range(len(pre_pt)):
         pre_pt[i] = bintohex(xor(pre_pt[i],w_bin[i]))
             
     #10 round
-    j = 4
     
+    k = 16
     for i in range(10):
+       
         #s box algorithm
         sub_pt = subword(pre_pt)
-        
+        print(' sub_ pt : ' ,sub_pt)
         #shiftrow algorithm
         s_pt = ge_matrix(permute(sub_pt,shiftrow_table,16))
-        for i in range(len(s_pt)):
-            s_pt[i] = bintohex(s_pt[i])
+        for p in range(len(s_pt)):
+            s_pt[p] = bintohex(s_pt[p])
+        print(' s_pt after_shift_row :  '  ,s_pt)
         #Mix column algorithm
-        if i == ( 8) :
-            continue
-        else :
+        print(' i : ' , i)
+        if( i != 9):
             sm_pt = []
-            for i in range(0,4):
-                sm_pt.append(mixColumns(s_pt[i],s_pt[i+4],s_pt[i+8],s_pt[i+12]))
-            for i in range(len(sm_pt)):
-                for j in range(len(sm_pt[i])):
-                    sm_pt[i][j] = bintohex(sm_pt[i][j])
-            change_to_dictionary(sm_pt)
-            m_pt = []
-            m_pt = permute_dictionary(sm_pt,re_table,16)
-        #Addroundkey algorithm
-        for i in range(len(m_pt)):
-            pt[i] = xor(hextobin(fmpt[i]),w_bin[j+i])
-        j = j + 4
-    return pt
+            for m in range(0,4):
+                sm_pt.append(mixColumns(s_pt[m],s_pt[m+4],s_pt[m+8],s_pt[m+12]))
+            for n in range(len(sm_pt)):
+                for j in range(len(sm_pt[n])):
+                    sm_pt[n][j] = bintohex(sm_pt[n][j])
+            s_pt = change_to_dictionary(sm_pt)
+            print(' s_pt _after mix : ' , s_pt)
+        else:
+            s_pt = permute_dictionary(s_pt,re_table,16)
+            
+            #Addroundkey algorithm
+        pt = []
+        for j in range(len(s_pt)):
+            print('w_bin : ' , bintohex(w_bin[k+j]) )
+            pt.append(bintohex(xor(hextobin(s_pt[j]),w_bin[k+j])))
+        pre_pt = pt
+        print('pre_pt : ' ,pre_pt)
+        k+= + 16
+        print( ' k : ' , k)
+    return pre_pt
 
-      
+print(encrypt(w,pt))      
