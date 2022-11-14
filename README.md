@@ -4,4 +4,4 @@ DES File :
 + Result
 #
 AES File :
-+ just AES function
++ AES _encryption
